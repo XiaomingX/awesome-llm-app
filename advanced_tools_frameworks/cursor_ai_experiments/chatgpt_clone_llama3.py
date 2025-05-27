@@ -1,40 +1,40 @@
 import streamlit as st
 from ollama import Client
 
-# Initialize Ollama client
+# 初始化 Ollama 客户端
 client = Client()
 
-# Set up Streamlit page
-st.set_page_config(page_title="Local ChatGPT Clone", page_icon="🤖", layout="wide")
-st.title("🤖 Local ChatGPT Clone")
+# 设置页面配置
+st.set_page_config(page_title="本地ChatGPT克隆", page_icon="🤖", layout="wide")
+st.title("🤖 本地ChatGPT克隆")
 
-# Initialize chat history
-if "messages" not in st.session_state:
-    st.session_state.messages = []
+# 初始化会话消息列表
+if "消息列表" not in st.session_state:
+    st.session_state.消息列表 = []
 
-# Display chat messages
-for message in st.session_state.messages:
-    with st.chat_message(message["role"]):
-        st.markdown(message["content"])
+# 展示已有的聊天记录
+for msg in st.session_state.消息列表:
+    with st.chat_message(msg["角色"]):
+        st.markdown(msg["内容"])
 
-# User input
-if prompt := st.chat_input("What's on your mind?"):
-    st.session_state.messages.append({"role": "user", "content": prompt})
+# 用户输入处理
+if 用户输入 := st.chat_input("你有什么想法？"):
+    st.session_state.消息列表.append({"角色": "user", "内容": 用户输入})
     with st.chat_message("user"):
-        st.markdown(prompt)
+        st.markdown(用户输入)
 
-    # Generate AI response
+    # AI回复生成并实时展示
     with st.chat_message("assistant"):
-        message_placeholder = st.empty()
-        full_response = ""
-        for response in client.chat(model="llama3.1:latest", messages=st.session_state.messages, stream=True):
-            full_response += response['message']['content']
-            message_placeholder.markdown(full_response + "▌")
-        message_placeholder.markdown(full_response)
-    st.session_state.messages.append({"role": "assistant", "content": full_response})
+        占位符 = st.empty()
+        回复内容 = ""
+        for 响应 in client.chat(model="llama3.1:latest", messages=st.session_state.消息列表, stream=True):
+            回复内容 += 响应['message']['content']
+            占位符.markdown(回复内容 + "▌")
+        占位符.markdown(回复内容)
+    st.session_state.消息列表.append({"角色": "assistant", "内容": 回复内容})
 
-# Add a sidebar with information
-st.sidebar.title("About")
-st.sidebar.info("This is a local ChatGPT clone using Ollama's llama3.1:latest model and Streamlit.")
+# 侧边栏信息
+st.sidebar.title("关于")
+st.sidebar.info("本地ChatGPT克隆，基于Ollama的llama3.1:latest模型和Streamlit实现。")
 st.sidebar.markdown("---")
-st.sidebar.markdown("Made with ❤️ by Your Name")
+st.sidebar.markdown("由 ❤️ Your Name 制作")

@@ -1,28 +1,32 @@
-## ⚡️ Multimodal Chatbot with Gemini Flash 
-This repository contains a Streamlit application that demonstrates a multimodal chatbot using Google's Gemini Flash model. The chatbot allows users to interact with the model using both image and text inputs, providing lightning-fast results.
+## ⚡️ 多模态聊天机器人（基于 Gemini Flash）
 
-## Features
-- Multimodal input: Users can upload images and enter text queries to interact with the chatbot.
-- Gemini Flash model: The chatbot leverages Google's powerful Gemini Flash model for generating responses.
-- Chat history: The application maintains a chat history, displaying the conversation between the user and the chatbot.
+本项目展示了一个基于 Google Gemini Flash 模型的多模态聊天机器人，支持图片和文本输入，响应速度极快。
 
-### How to get Started?
+### 主要功能
+- **多模态输入**：支持上传图片和文本提问。
+- **Gemini Flash 模型**：采用谷歌轻量级但高效的 Gemini Flash 模型。
+- **聊天记录**：自动保存并展示对话历史。
 
-1. Clone the GitHub repository
+### 快速开始
+
+1. 克隆代码库：
 
 ```bash
 git clone https://github.com/Shubhamsaboo/awesome-llm-apps.git
 ```
-2. Install the required dependencies:
+
+2. 安装依赖：
 
 ```bash
 pip install -r requirements.txt
 ```
-3. Get your Google Studio API Key
 
-- Sign up for an [Google AI Studio](https://aistudio.google.com/app/apikey) and obtain your API key.
+3. 获取 Google AI Studio API Key：
 
-4. Run the Streamlit App
+- 访问 [Google AI Studio](https://aistudio.google.com/app/apikey) 注册并申请 API Key。
+
+4. 启动应用：
+
 ```bash
 streamlit run gemini_multimodal_chatbot.py
 ```

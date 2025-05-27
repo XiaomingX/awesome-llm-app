@@ -1,52 +1,49 @@
 import os
-
-os.environ["OPENAI_API_KEY"] = "your_openai_api_key"
-os.environ['TOGETHERAI_API_KEY'] = "your_togetherai_api_key"
-
 import streamlit as st
 from routellm.controller import Controller
 
-# Initialize RouteLLM client
+# 设置API密钥
+os.environ["OPENAI_API_KEY"] = "your_openai_api_key"
+os.environ["TOGETHERAI_API_KEY"] = "your_togetherai_api_key"
+
+# 初始化RouteLLM客户端
 client = Controller(
     routers=["mf"],
     strong_model="gpt-4o-mini",
-    weak_model="together_ai/meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo",
+    weak_model="together_ai/meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo"
 )
 
-# Set up Streamlit app
-st.title("RouteLLM Chat App")
+st.title("RouteLLM 聊天应用")
 
-# Initialize chat history
+# 初始化聊天记录
 if "messages" not in st.session_state:
-    st.session_state.messages = []
+    st.session_state["messages"] = []
 
-# Display chat messages
-for message in st.session_state.messages:
-    with st.chat_message(message["role"]):
-        st.markdown(message["content"])
-        if "model" in message:
-            st.caption(f"Model used: {message['model']}")
+# 展示聊天记录
+for msg in st.session_state["messages"]:
+    with st.chat_message(msg["role"]):
+        st.markdown(msg["content"])
+        if "model" in msg:
+            st.caption(f"使用模型：{msg['model']}")
 
-# Chat input
-if prompt := st.chat_input("What is your message?"):
-    # Add user message to chat history
-    st.session_state.messages.append({"role": "user", "content": prompt})
+# 输入消息
+if user_input := st.chat_input("请输入消息："):
+    # 记录用户消息
+    st.session_state["messages"].append({"role": "user", "content": user_input})
     with st.chat_message("user"):
-        st.markdown(prompt)
+        st.markdown(user_input)
 
-    # Get RouteLLM response
+    # 获取并展示AI回复
     with st.chat_message("assistant"):
-        message_placeholder = st.empty()
-        response = client.chat.completions.create(
+        placeholder = st.empty()
+        resp = client.chat.completions.create(
             model="router-mf-0.11593",
-            messages=[{"role": "user", "content": prompt}]
+            messages=[{"role": "user", "content": user_input}]
         )
-        message_content = response['choices'][0]['message']['content']
-        model_name = response['model']
-        
-        # Display assistant's response
-        message_placeholder.markdown(message_content)
-        st.caption(f"Model used: {model_name}")
-    
-    # Add assistant's response to chat history
-    st.session_state.messages.append({"role": "assistant", "content": message_content, "model": model_name})
+        content = resp['choices'][0]['message']['content']
+        model_used = resp['model']
+        placeholder.markdown(content)
+        st.caption(f"使用模型：{model_used}")
+
+    # 记录AI回复
+    st.session_state["messages"].append({"role": "assistant", "content": content, "model": model_used})

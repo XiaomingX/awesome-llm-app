@@ -1,49 +1,31 @@
 import streamlit as st
 from scrapegraphai.graphs import SmartScraperGraph
 
-# Streamlit app title
-st.title("AI Web Scraper")
+st.title("AI网页智能爬取器")
 
-# Input fields for user prompt and source URL
-prompt = st.text_input("Enter the information you want to extract:")
-source_url = st.text_input("Enter the source URL:")
+# 用户输入
+信息需求 = st.text_input("请输入您想提取的信息内容：")
+网址 = st.text_input("请输入网页链接：")
+密钥 = st.text_input("请输入OpenAI API密钥：", type="password")
 
-# Input field for OpenAI API key
-api_key = st.text_input("Enter your OpenAI API key:", type="password")
-
-# Configuration for the scraping pipeline
-graph_config = {
-    "llm": {
-        "api_key": api_key,
-        "model": "openai/gpt-4o-mini",
-    },
+配置 = {
+    "llm": {"api_key": 密钥, "model": "openai/gpt-4o-mini"},
     "verbose": True,
     "headless": False,
 }
 
-# Button to start the scraping process
-if st.button("Scrape"):
-    if prompt and source_url and api_key:
-        # Create the SmartScraperGraph instance
-        smart_scraper_graph = SmartScraperGraph(
-            prompt=prompt,
-            source=source_url,
-            config=graph_config
-        )
-
-        # Run the pipeline
-        result = smart_scraper_graph.run()
-
-        # Display the result
-        st.write(result)
+if st.button("开始爬取"):
+    if 信息需求 and 网址 and 密钥:
+        爬虫 = SmartScraperGraph(prompt=信息需求, source=网址, config=配置)
+        结果 = 爬虫.run()
+        st.write(结果)
     else:
-        st.error("Please provide all the required inputs.")
+        st.error("请完整填写所有输入项！")
 
-# Instructions for the user
 st.markdown("""
-### Instructions
-1. Enter the information you want to extract in the first input box.
-2. Enter the source URL from which you want to extract the information.
-3. Enter your OpenAI API key.
-4. Click on the "Scrape" button to start the scraping process.
+### 使用说明
+1. 输入您想提取的信息内容。
+2. 输入目标网页链接。
+3. 输入您的OpenAI API密钥。
+4. 点击“开始爬取”按钮，等待结果显示。
 """)

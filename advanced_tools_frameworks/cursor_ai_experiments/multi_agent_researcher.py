@@ -3,133 +3,127 @@ from crewai import Agent, Task, Crew, Process
 from langchain_openai import ChatOpenAI
 import os
 
-# Initialize the GPT-4 model
+# 初始化模型变量
 gpt4_model = None
 
-def create_article_crew(topic):
-    # Create agents
-    researcher = Agent(
-        role='Researcher',
-        goal='Conduct thorough research on the given topic',
-        backstory='You are an expert researcher with a keen eye for detail',
-        verbose=True,
-        allow_delegation=False,
-        llm=gpt4_model
-    )
+# 定义创建文章多智能体团队的函数
+def 创建文章团队(主题):
+    # 角色信息字典，方便循环创建
+    角色信息 = {
+        "研究员": {
+            "目标": "对主题进行深入调研，收集关键信息、数据和专家观点",
+            "背景": "你是一名细致入微的专业研究员",
+        },
+        "撰稿人": {
+            "目标": "根据调研内容撰写详细且生动的文章，使用Markdown格式",
+            "背景": "你是一名擅长写作和排版的内容专家",
+        },
+        "编辑": {
+            "目标": "审核并优化文章，确保内容清晰、准确且格式规范",
+            "背景": "你是一名经验丰富的编辑，注重内容质量和排版",
+        }
+    }
 
-    writer = Agent(
-        role='Writer',
-        goal='Write a detailed and engaging article based on the research, using proper markdown formatting',
-        backstory='You are a skilled writer with expertise in creating informative content and formatting it beautifully in markdown',
-        verbose=True,
-        allow_delegation=False,
-        llm=gpt4_model
-    )
+    # 创建Agent对象列表
+    agents = []
+    for 角色, 信息 in 角色信息.items():
+        agents.append(Agent(
+            role=角色,
+            goal=信息["目标"],
+            backstory=信息["背景"],
+            verbose=True,
+            allow_delegation=False,
+            llm=gpt4_model
+        ))
 
-    editor = Agent(
-        role='Editor',
-        goal='Review and refine the article for clarity, accuracy, engagement, and proper markdown formatting',
-        backstory='You are an experienced editor with a sharp eye for quality content and excellent markdown structure',
-        verbose=True,
-        allow_delegation=False,
-        llm=gpt4_model
-    )
+    # 创建任务描述字典，顺序对应agents列表
+    任务描述 = [
+        f"请围绕主题“{主题}”进行全面调研，收集关键数据和专家观点。",
+        """请根据调研内容撰写一篇结构清晰、内容丰富的文章，要求：
+        - 使用Markdown格式，包含主标题（H1）、章节标题（H2）、小节标题（H3）
+        - 适当使用项目符号或编号列表
+        - 重点内容加粗或斜体强调
+        - 文章条理清晰，易于阅读""",
+        """请审核文章，确保：
+        - Markdown格式正确且统一
+        - 标题层级合理
+        - 内容逻辑流畅，吸引读者
+        - 重点突出
+        并对内容和格式进行必要的修改和提升。"""
+    ]
 
-    # Create tasks
-    research_task = Task(
-        description=f"Conduct comprehensive research on the topic: {topic}. Gather key information, statistics, and expert opinions.",
-        agent=researcher,
-        expected_output="A comprehensive research report on the given topic, including key information, statistics, and expert opinions."
-    )
+    预期输出 = [
+        "调研报告，包含关键数据和专家观点。",
+        "基于调研的详细且格式规范的Markdown文章。",
+        "最终润色后的高质量文章。"
+    ]
 
-    writing_task = Task(
-        description="""Using the research provided, write a detailed and engaging article. 
-        Ensure proper structure, flow, and clarity. Format the article using markdown, including:
-        1. A main title (H1)
-        2. Section headings (H2)
-        3. Subsection headings where appropriate (H3)
-        4. Bullet points or numbered lists where relevant
-        5. Emphasis on key points using bold or italic text
-        Make sure the content is well-organized and easy to read.""",
-        agent=writer,
-        expected_output="A well-structured, detailed, and engaging article based on the provided research, formatted in markdown with proper headings and subheadings."
-    )
+    # 创建Task对象列表
+    tasks = []
+    for i in range(len(agents)):
+        tasks.append(Task(
+            description=任务描述[i],
+            agent=agents[i],
+            expected_output=预期输出[i]
+        ))
 
-    editing_task = Task(
-        description="""Review the article for clarity, accuracy, engagement, and proper markdown formatting. 
-        Ensure that:
-        1. The markdown formatting is correct and consistent
-        2. Headings and subheadings are used appropriately
-        3. The content flow is logical and engaging
-        4. Key points are emphasized correctly
-        Make necessary edits and improvements to both content and formatting.""",
-        agent=editor,
-        expected_output="A final, polished version of the article with improved clarity, accuracy, engagement, and proper markdown formatting."
-    )
-
-    # Create the crew
+    # 创建团队，顺序执行任务
     crew = Crew(
-        agents=[researcher, writer, editor],
-        tasks=[research_task, writing_task, editing_task],
+        agents=agents,
+        tasks=tasks,
         verbose=2,
         process=Process.sequential
     )
-
     return crew
 
-# Streamlit app
-st.set_page_config(page_title="Multi Agent AI Researcher", page_icon="📝")
+# Streamlit 页面配置和样式
+st.set_page_config(page_title="多智能体AI写作助手", page_icon="📝")
 
-# Custom CSS for better appearance
 st.markdown("""
-    <style>
-    .stApp {
-        max-width: 1800px;
-        margin: 0 auto;
-        font-family: Arial, sans-serif;
-    }
-    .st-bw {
-        background-color: #f0f2f6;
-    }
-    .stButton>button {
-        background-color: #4CAF50;
-        color: white;
-        font-weight: bold;
-    }
-    .stTextInput>div>div>input {
-        background-color: #ffffff;
-    }
-    </style>
-    """, unsafe_allow_html=True)
+<style>
+.stApp {
+    max-width: 1800px;
+    margin: 0 auto;
+    font-family: "微软雅黑", Arial, sans-serif;
+}
+.stButton>button {
+    background-color: #4CAF50;
+    color: white;
+    font-weight: bold;
+}
+.stTextInput>div>div>input {
+    background-color: #ffffff;
+}
+</style>
+""", unsafe_allow_html=True)
 
-st.title("📝 Multi Agent AI Researcher")
+st.title("📝 多智能体AI写作助手")
 
-# Sidebar for API key input
+# 侧边栏输入API Key
 with st.sidebar:
-    st.header("Configuration")
-    api_key = st.text_input("Enter your OpenAI API Key:", type="password")
+    st.header("配置")
+    api_key = st.text_input("请输入OpenAI API密钥（API Key）：", type="password")
     if api_key:
         os.environ["OPENAI_API_KEY"] = api_key
         gpt4_model = ChatOpenAI(model_name="gpt-4o-mini")
-        st.success("API Key set successfully!")
+        st.success("API密钥设置成功！")
     else:
-        st.info("Please enter your OpenAI API Key to proceed.")
+        st.info("请输入OpenAI API密钥以继续。")
 
-# Main content
-st.markdown("Generate detailed articles on any topic using AI agents!")
+st.markdown("使用AI多智能体，快速生成高质量文章！")
 
-topic = st.text_input("Enter the topic for the article:", placeholder="e.g., The Impact of Artificial Intelligence on Healthcare")
+subject = st.text_input("请输入文章主题：", placeholder="例如：人工智能对医疗行业的影响")
 
-if st.button("Generate Article"):
+if st.button("生成文章"):
     if not api_key:
-        st.error("Please enter your OpenAI API Key in the sidebar.")
-    elif not topic:
-        st.warning("Please enter a topic for the article.")
+        st.error("请在侧边栏输入OpenAI API密钥。")
+    elif not subject.strip():
+        st.warning("请输入文章主题。")
     else:
-        with st.spinner("🤖 AI agents are working on your article..."):
-            crew = create_article_crew(topic)
-            result = crew.kickoff()
-            st.markdown(result)
+        with st.spinner("🤖 AI智能体正在生成文章，请稍候..."):
+            团队 = 创建文章团队(subject)
+            结果 = 团队.kickoff()
+            st.markdown(结果)
 
 st.markdown("---")
-st.markdown("Powered by CrewAI and OpenAI :heart:")
+st.markdown("由CrewAI和OpenAI强力驱动 ❤️")
